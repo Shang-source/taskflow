@@ -1,0 +1,261 @@
+basePath: /
+definitions:
+  models.ErrorResponse:
+    properties:
+      error:
+        example: Username or Password is incorrect
+        type: string
+    type: object
+  models.LoginInput:
+    properties:
+      password:
+        example: "123456"
+        type: string
+      username:
+        example: admin
+        type: string
+    type: object
+  models.LoginResponse:
+    properties:
+      message:
+        example: Login successful
+        type: string
+      token:
+        description: JWT 示例
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6...
+        type: string
+    type: object
+  models.Message:
+    properties:
+      message:
+        type: string
+    type: object
+  models.Notification:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_read:
+        type: boolean
+      message:
+        type: string
+      task_id:
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  models.Task:
+    properties:
+      description:
+        type: string
+      due_date:
+        description: 到期时间
+        type: string
+      id:
+        type: integer
+      is_done:
+        type: boolean
+      reminded:
+        description: 是否已提醒
+        type: boolean
+      title:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  models.User:
+    properties:
+      id:
+        type: integer
+      password:
+        description: 返回时可以省略密码
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: Swagger for Gin-based TaskFlow app
+  title: TaskFlow API
+  version: "1.0"
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: User logs in with username and password
+      parameters:
+      - description: Login Information
+        in: body
+        name: loginInput
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LoginResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: User Login
+      tags:
+      - Auth
+  /notifications:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Notification'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: Get User Notification
+      tags:
+      - Notifications
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Create Users
+      parameters:
+      - description: User Information
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+      summary: User Registration
+      tags:
+      - Auth
+  /tasks:
+    get:
+      description: Supports pagination and sorting (if needed)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Task'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: Get all tasks of the current user
+      tags:
+      - Tasks
+    post:
+      consumes:
+      - application/json
+      description: 为当前用户创建一个新任务
+      parameters:
+      - description: 任务内容
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/models.Task'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Task'
+      security:
+      - ApiKeyAuth: []
+      summary: Create Tasks
+      tags:
+      - Tasks
+  /tasks/{id}:
+    delete:
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Message'
+      security:
+      - ApiKeyAuth: []
+      summary: Delete Tasks
+      tags:
+      - Tasks
+    get:
+      parameters:
+      - description: 任务 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Task'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get a single task by ID
+      tags:
+      - Tasks
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 任务 ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 任务内容
+        in: body
+        name: task
+        required: true
+        schema:
+          $ref: '#/definitions/models.Task'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Task'
+      security:
+      - ApiKeyAuth: []
+      summary: Update Tasks
+      tags:
+      - Tasks
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
