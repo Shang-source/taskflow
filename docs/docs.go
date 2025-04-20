@@ -55,33 +55,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/notifications": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Notifications"
-                ],
-                "summary": "Get User Notification",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/models.Notification"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/register": {
             "post": {
                 "description": "Create Users",
@@ -142,153 +115,6 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "为当前用户创建一个新任务",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Tasks"
-                ],
-                "summary": "Create Tasks",
-                "parameters": [
-                    {
-                        "description": "任务内容",
-                        "name": "task",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Task"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/models.Task"
-                        }
-                    }
-                }
-            }
-        },
-        "/tasks/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Tasks"
-                ],
-                "summary": "Get a single task by ID",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "任务 ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Task"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/models.ErrorResponse"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Tasks"
-                ],
-                "summary": "Update Tasks",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "任务 ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "任务内容",
-                        "name": "task",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/models.Task"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Task"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "tags": [
-                    "Tasks"
-                ],
-                "summary": "Delete Tasks",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Task ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/models.Message"
-                        }
-                    }
-                }
             }
         }
     },
@@ -329,37 +155,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Message": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        },
-        "models.Notification": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "is_read": {
-                    "type": "boolean"
-                },
-                "message": {
-                    "type": "string"
-                },
-                "task_id": {
-                    "type": "integer"
-                },
-                "user_id": {
-                    "type": "integer"
-                }
-            }
-        },
         "models.Task": {
             "type": "object",
             "properties": {
@@ -367,7 +162,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "due_date": {
-                    "description": "到期时间",
+                    "description": "Expiration time",
                     "type": "string"
                 },
                 "id": {
@@ -377,7 +172,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "reminded": {
-                    "description": "是否已提醒",
+                    "description": "Has it been reminded",
                     "type": "boolean"
                 },
                 "title": {
@@ -395,7 +190,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "password": {
-                    "description": "返回时可以省略密码",
                     "type": "string"
                 },
                 "username": {

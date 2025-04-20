@@ -1,10 +1,9 @@
 package middlewares
 
 import (
+	"github.com/gin-gonic/gin"
 	"log"
 	"time"
-
-	"github.com/gin-gonic/gin"
 )
 
 func Logger() gin.HandlerFunc {
@@ -12,6 +11,6 @@ func Logger() gin.HandlerFunc {
 		start := time.Now()
 		c.Next()
 		end := time.Now()
-		log.Printf("请求: %s %s, 耗时: %v", c.Request.Method, c.Request.URL.Path, end.Sub(start))
+		log.Printf("request: %s %s, Duration: %v", c.Request.Method, c.Request.URL.Path, end.Sub(start))
 	}
 }

@@ -10,18 +10,18 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// DB 全局数据库连接对象
+// DB Global database connection object
 var DB *sql.DB
 
 func init() {
-	// 在包初始化时就加载 .env（也可在 main.go 中加载）
+	// Load the .env file during package initialization (or alternatively in main.go)
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("未找到 .env 文件，使用默认环境变量")
+		log.Println(".env file not found, using default environment variables.")
 	}
 }
 
-// ConnectDB 连接数据库
+// ConnectDB connect database
 func ConnectDB() {
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
@@ -33,21 +33,21 @@ func ConnectDB() {
 		user, pass, host, port, dbName)
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-		log.Fatalf("数据库连接失败: %v", err)
+		log.Fatalf("Database fail to connect: %v", err)
 	}
-	// 测试连通性
+	// Test connectivity
 	if err = db.Ping(); err != nil {
-		log.Fatalf("数据库无法Ping通: %v", err)
+		log.Fatalf("Database cannot Ping: %v", err)
 	}
 
-	log.Println("数据库连接成功!")
+	log.Println("Database connect success!")
 	DB = db
 
-	// 这里可执行建表等操作
+	// execute table creation and other operations
 	initTables()
 }
 
-// initTables 可选：初始化表结构
+// initTables initialize table structure
 func initTables() {
 	createUserTable := `
 	CREATE TABLE IF NOT EXISTS users (
@@ -58,7 +58,7 @@ func initTables() {
 	`
 	_, err := DB.Exec(createUserTable)
 	if err != nil {
-		log.Printf("创建 users 表出错: %v\n", err)
+		log.Printf("Create users tables error: %v\n", err)
 	}
 
 	createTaskTable := `
@@ -77,22 +77,6 @@ func initTables() {
 	if err != nil {
 		log.Printf("Create tasks tables error: %v\n", err)
 
-		// 新增 notifications 表，用于存储提醒
-		createNotifTable := `
-        CREATE TABLE IF NOT EXISTS notifications (
-          id BIGINT AUTO_INCREMENT PRIMARY KEY,
-          user_id BIGINT NOT NULL,
-          task_id BIGINT NOT NULL,
-          message VARCHAR(255) NOT NULL,
-          is_read BOOLEAN NOT NULL DEFAULT FALSE,
-          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (user_id) REFERENCES users(id),
-          FOREIGN KEY (task_id) REFERENCES tasks(id)
-    );
-    `
-		if _, err := DB.Exec(createNotifTable); err != nil {
-			log.Printf("Create notifications tables error: %v\n", err)
-		}
 	}
 
 }

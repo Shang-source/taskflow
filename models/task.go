@@ -8,6 +8,6 @@ type Task struct {
 	Description string     `json:"description"`
 	IsDone      bool       `json:"is_done"`
 	UserID      int64      `json:"user_id"`
-	DueDate     *time.Time `json:"due_date,omitempty"` // 到期时间
-	Reminded    bool       `json:"reminded"`           // 是否已提醒
+	DueDate     *time.Time `json:"due_date,omitempty"` // Expiration time
+	Reminded    bool       `json:"reminded"`           //
 }

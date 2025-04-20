@@ -11,7 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-// GenerateToken 生成 JWT
+// GenerateToken JWT
 func GenerateToken(userID int64, username string) (string, error) {
 	secret := os.Getenv("JWT_SECRET")
 	expireHoursStr := os.Getenv("JWT_EXPIRE_HOURS")
@@ -33,7 +33,7 @@ func GenerateToken(userID int64, username string) (string, error) {
 	return token.SignedString([]byte(secret))
 }
 
-// AuthRequired 作为 Gin 中间件，验证 JWT
+// AuthRequired middleware for Gin to validate JWT
 func AuthRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
@@ -47,22 +47,22 @@ func AuthRequired() gin.HandlerFunc {
 
 		token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("不支持的签名方法")
+				return nil, fmt.Errorf("Unsupported signing method")
 			}
 			return []byte(secret), nil
 		})
 
 		if err != nil || !token.Valid {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Token无效或过期"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
 			return
 		}
 
-		// 从 token 中获取 claims
+		// Extract claims from the token
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			userID := int64(claims["userID"].(float64))
 			username := claims["username"].(string)
 
-			// 将 userID, username 存储到上下文中，后续处理可以拿来用
+			// Store userID and username in the context for later use in subsequent handlers.
 			c.Set("userID", userID)
 			c.Set("username", username)
 		} else {

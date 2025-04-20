@@ -1,21 +1,16 @@
 package main
 
 import (
-	"context"
 	"fmt"
+	"github.com/joho/godotenv"
+	"github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
 	"os"
 	"strconv"
-
-	"github.com/joho/godotenv"
-
 	"taskflow/config"
-	_ "taskflow/docs" // 导入 swagger 文档
-	"taskflow/jobs"
+	_ "taskflow/docs" // import swagger document
 	"taskflow/routes"
-
-	"github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // @title TaskFlow API
@@ -23,22 +18,20 @@ import (
 // @description Swagger for Gin-based TaskFlow app
 // @host localhost:8080
 // @BasePath /
-
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
 // @name Authorization
 func main() {
-	// 加载环境变量
+	// Load environment variables
 	err := godotenv.Load()
 	if err != nil {
 		log.Println("Not fund.env file，using system env")
 	}
-
-	// 连接数据库
+	// connect database
 	config.ConnectDB()
 	defer config.DB.Close()
 
-	// 获取端口号
+	// get port id
 	portStr := os.Getenv("RUN_PORT")
 	if portStr == "" {
 		portStr = "8080"
@@ -48,18 +41,13 @@ func main() {
 		port = 8080
 	}
 
-	// 初始化 Gin
+	// initialize Gin
 	r := routes.SetupRouter()
 
-	// 注册 Swagger 路由
+	// register Swagger route
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// 启动到期提醒调度
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	jobs.StartScheduler(ctx)
-
-	// 启动服务
+	// start service
 	log.Printf("Server running at http://localhost:%d\n", port)
 	r.Run(fmt.Sprintf(":%d", port))
 }
