@@ -38,7 +38,7 @@ func AuthRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "缺少Token"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "lack Token"})
 			return
 		}
 
@@ -66,7 +66,7 @@ func AuthRequired() gin.HandlerFunc {
 			c.Set("userID", userID)
 			c.Set("username", username)
 		} else {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "解析Token出错"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Error parsing token."})
 			return
 		}
 

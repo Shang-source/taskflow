@@ -21,7 +21,7 @@ definitions:
         example: Login successful
         type: string
       token:
-        description: JWT 示例
+        description: JWT example
         example: eyJhbGciOiJIUzI1NiIsInR5cCI6...
         type: string
     type: object
@@ -37,7 +37,6 @@ definitions:
       is_done:
         type: boolean
       reminded:
-        description: Has it been reminded
         type: boolean
       title:
         type: string

@@ -149,7 +149,7 @@ const docTemplate = `{
                     "example": "Login successful"
                 },
                 "token": {
-                    "description": "JWT 示例",
+                    "description": "JWT example",
                     "type": "string",
                     "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6..."
                 }
@@ -172,7 +172,6 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "reminded": {
-                    "description": "Has it been reminded",
                     "type": "boolean"
                 },
                 "title": {

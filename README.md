@@ -1,172 +1,109 @@
 # TaskFlow
 
-**Lightweight To‑Do List REST API built with Go and Gin**
+TaskFlow is a simple Go-based backend for task management. It provides RESTful APIs for user registration, login (JWT-based authentication), and task retrieval, all documented with Swagger.
 
-## Overview
+## Features
 
-TaskFlow is a simple yet powerful backend service for managing to‑do tasks. It provides:
-
-- **User Registration & Login** using JWT authentication
-
-- **Task CRUD** (Create, Read, Update, Delete)
-
-- **Due‑Date Reminders** via background scheduler
-
-- **Pagination & Sorting** by due date
-
-- **Structured Logging Middleware** for HTTP request monitoring
-
-- **Auto‑Generated Swagger / OpenAPI Documentation**
-
+- User registration (`POST /register`)
+- User login with JWT issuance (`POST /login`)
+- Protected task list retrieval (`GET /tasks` with `Authorization` header)
+- Auto-generated Swagger UI for API exploration
+- Environment-based configuration
+- Automatic table creation for MySQL (users & tasks)
 
 ## Prerequisites
 
-- Go 1.20 or higher
+- Go 1.18+
+- MySQL 5.7+ (or compatible)
+- Docker & Docker Compose (optional, for local MySQL)
 
-- MySQL 5.7+ (or compatible MariaDB)
+## Installation & Setup
 
-- `swag` CLI for generating Swagger docs:
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-org/taskflow.git
+   cd taskflow
+   ```
 
-    ```bash
-    go install github.com/swaggo/swag/cmd/swag@latest
-    ```
+2. **Environment Variables**
+   Copy `env.sample` to `.env` and update values:
+   ```env
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_USER=root
+   DB_PASS=stt123456
+   DB_NAME=taskflow_db
 
+   JWT_SECRET=MySecretKey
+   JWT_EXPIRE_HOURS=24
 
-## Configuration
+   RUN_PORT=8080
+   ```
 
-Create a `.env` file in the project root with the following variables:
+3. **Start MySQL** (optional with Docker)
+   ```bash
+   docker-compose up -d mysql
+   ```
 
-```dotenv
-# Database settings
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_USER=root
-DB_PASS=your_password
-DB_NAME=taskflow_db
+4. **Install dependencies**
+   ```bash
+   go mod tidy
+   ```
 
-# JWT settings
-JWT_SECRET=YourSecretKey
-JWT_EXPIRE_HOURS=24
+## Database Migration
 
-# Server port
-RUN_PORT=8080
+Tables are created automatically on startup. Alternatively, run the migration script:
+
+```bash
+go run cmd/migrate.go
 ```
 
-## Database Initialization
+## Running the Server
 
-On startup, the application will automatically create the required tables (users, tasks, notifications). To manually apply schema changes, run:
+1. **Generate Swagger docs & start**
+   ```bash
+   swag init && go run main.go
+   ```
 
-```sql
-ALTER TABLE tasks ADD COLUMN due_date DATETIME NULL;
-ALTER TABLE tasks ADD COLUMN reminded BOOLEAN NOT NULL DEFAULT FALSE;
+2. **Open Swagger UI**
+   Visit: http://localhost:8080/swagger/  
+   Use **Try it out** to test endpoints.
 
-CREATE TABLE IF NOT EXISTS notifications (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  user_id BIGINT NOT NULL,
-  task_id BIGINT NOT NULL,
-  message VARCHAR(255) NOT NULL,
-  is_read BOOLEAN NOT NULL DEFAULT FALSE,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-```
+## API Endpoints
 
-## Build & Run
+### Register
+- **POST** `/register`
+- Body: `{ "username": "user1", "password": "pass" }`
+- Response: `{ "message": "Registration successful", "user": { "id": 1, "username": "user1" } }`
 
-1. Install dependencies:
+### Login
+- **POST** `/login`
+- Body: `{ "username": "user1", "password": "pass" }`
+- Response: `{ "message": "Login successful", "token": "<JWT>" }`
 
-    ```bash
-    go mod tidy
-    ```
-
-2. Generate Swagger documentation:
-
-    ```bash
-    swag init -g main.go --parseDependency
-    ```
-
-3. Start the server:
-
-    ```bash
-    go run main.go
-    ```
-
-4. Open Swagger UI in your browser:
-
-    ```
-    http://localhost:8080/swagger/index.html
-    ```
-
+### Get Tasks
+- **GET** `/tasks`
+- Header: `Authorization: Bearer <JWT>`
+- Response: `[{ "id": 1, "title": "Task 1", ... }]`
 
 ## Project Structure
 
 ```
 taskflow/
-├─ controllers/       # API handlers (auth, tasks, notifications)
-├─ middlewares/       # JWT auth & logging middleware
-├─ models/            # Data models (User, Task, Notification)
-├─ jobs/              # Background scheduler for reminders
-├─ routes/            # HTTP route definitions
-├─ config/            # Database connection & schema initialization
-├─ docs/              # Generated Swagger files
-├─ main.go            # Application entry point
-├─ go.mod             # Go module file
-└─ .env               # Environment variables
+├── cmd/               # Migration script
+│   └── migrate.go
+├── config/            # Environment & DB connection
+│   └── database.go
+├── controllers/       # HTTP handlers
+│   ├── auth.go
+│   └── task.go
+├── middlewares/       # Gin middleware (logging, auth)
+├── models/            # Data models & Swagger annotations
+├── routes/            # URL routing setup
+├── docs/              # Generated Swagger files
+├── .env               # Environment variables
+├── main.go            # Application entry point
+├── go.mod             # Go module definition
+└── go.sum             # Dependency checksums
 ```
 
-## API Examples
-
-### Register a New User
-
-```bash
-curl -X POST http://localhost:8080/register \
-  -H "Content-Type: application/json" \
-  -d '{"username":"alice","password":"secret"}'
-```
-
-### Login and Obtain JWT
-
-```bash
-curl -X POST http://localhost:8080/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"alice","password":"secret"}'
-```
-
-### Authorize with Bearer Token
-
-In Swagger UI, click **Authorize** and enter:
-
-```
-Bearer <your_jwt_token>
-```
-
-### Create a Task
-
-```bash
-curl -X POST http://localhost:8080/tasks \
-  -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{"title":"Buy milk","due_date":"2025-04-18T12:00:00Z"}'
-```
-
-## Due‑Date Reminders
-
-- A scheduler runs every minute, selecting tasks where:
-
-    - `due_date <= now`
-
-    - `is_done = false`
-
-    - `reminded = false`
-
-- It inserts a record into the `notifications` table and sets `reminded = true`.
-
-- Use `GET /notifications` to fetch unread reminders.
-
-
-## Logging Middleware
-
-All requests pass through `middlewares.Logger()`, which logs HTTP method, path, and processing time.
-
-## License
-
-This project is licensed under the MIT License. Feel free to use and modify.

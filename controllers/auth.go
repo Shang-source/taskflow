@@ -43,7 +43,6 @@ func RegisterUser(c *gin.Context) {
 	}
 	id, _ := result.LastInsertId()
 	input.ID = id
-
 	c.JSON(http.StatusOK, gin.H{"message": "Registration successful", "user": input})
 
 }
